@@ -145,6 +145,7 @@
         .book-title { font-size: 0.95rem; font-weight: bold; margin: 0 0 5px 0; color: #2c3e50; line-height: 1.4; }
         .book-author { font-size: 0.8rem; color: #7f8c8d; margin: 0; }
         .loading { text-align: center; font-size: 1.2rem; color: #666; margin-top: 100px; }
+        .error-msg { text-align: center; font-size: 1.2rem; color: var(--warning-color); margin-top: 100px; font-weight: bold; }
 
         @media (max-width: 768px) {
             body { flex-direction: column; }
@@ -190,8 +191,10 @@
     </main>
 
     <script>
+        // ID đúng của Google Sheet của bạn
         const SHEET_ID = '1XnRvJ2RKDeVYuBijmWLPyAseIQQtFbKErof-pl1sZdY';
-        // Đã sửa lại đường link tại đây
+        
+        // ĐƯỜNG LINK ĐÃ ĐƯỢC SỬA LỖI (Sử dụng API chuẩn của Google Sheets)
         const SPREADSHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/pub?output=csv`;
 
         let myBooks = [];
@@ -224,13 +227,14 @@
 
         async function fetchBooksFromSheet() {
             try {
-                const response = await fetch(SPREADSHEET_URL);
+                // Đảm bảo không bị lưu cache trình duyệt khi fetch dữ liệu mới
+                const response = await fetch(SPREADSHEET_URL + "&t=" + new Date().getTime());
                 if (!response.ok) throw new Error("Mạng có vấn đề hoặc sai đường link.");
                 
                 const text = await response.text();
                 const parsedData = parseCSV(text);
                 
-                // Loại bỏ hàng tiêu đề đầu tiên trong Google Sheet
+                // Loại bỏ hàng tiêu đề đầu tiên trong Google Sheet (hàng chứa chữ "Tên sách")
                 myBooks = parsedData.filter(book => 
                     book.title !== '' && 
                     book.title.toLowerCase() !== 'tên sách'
@@ -242,8 +246,9 @@
                 checkDuplicateBooks();
                 handleAllFilters(); // Hiển thị sách ra màn hình
             } catch (error) {
-                document.getElementById('loadingText').innerHTML = '❌ Lỗi kết nối dữ liệu. Hãy đảm bảo bạn đã chọn Tệp -> Chia sẻ -> Xuất bản lên web trên Google Sheet!';
-                console.error(error);
+                document.getElementById('loadingText').className = 'error-msg';
+                document.getElementById('loadingText').innerHTML = '❌ Lỗi kết nối dữ liệu. Xin hãy kiểm tra lại đường truyền mạng hoặc link Google Sheet!';
+                console.error("Lỗi chi tiết:", error);
             }
         }
 
@@ -262,7 +267,6 @@
             fileTypes.forEach(f => fileSelect.options[fileSelect.options.length] = new Option(f, f));
         }
 
-        // Bổ sung hoàn thiện hàm kiểm tra trùng sách
         function checkDuplicateBooks() {
             const titles = myBooks.map(b => b.title.toLowerCase());
             const duplicates = myBooks.filter((book, index) => titles.indexOf(book.title.toLowerCase()) !== index);
@@ -277,7 +281,6 @@
             }
         }
 
-        // Bổ sung hàm xử lý Lọc (Filter) và Tìm kiếm
         function handleAllFilters() {
             const searchTerm = document.getElementById('searchBox').value.toLowerCase();
             const catValue = document.getElementById('categoryFilter').value;
@@ -285,7 +288,10 @@
             const fileValue = document.getElementById('fileFilter').value;
 
             const filteredBooks = myBooks.filter(book => {
-                const matchSearch = book.title.toLowerCase().includes(searchTerm) || book.author.toLowerCase().includes(searchTerm);
+                const titleStr = book.title ? book.title.toLowerCase() : '';
+                const authorStr = book.author ? book.author.toLowerCase() : '';
+                
+                const matchSearch = titleStr.includes(searchTerm) || authorStr.includes(searchTerm);
                 const matchCat = catValue === 'all' || book.category === catValue;
                 const matchAuthor = authorValue === 'all' || book.author === authorValue;
                 const matchFile = fileValue === 'all' || book.fileType === fileValue;
@@ -296,7 +302,6 @@
             displayBooks(filteredBooks);
         }
 
-        // Bổ sung hàm render/hiển thị dữ liệu dạng thẻ HTML
         function displayBooks(books) {
             const grid = document.getElementById('bookGrid');
             grid.innerHTML = '';
