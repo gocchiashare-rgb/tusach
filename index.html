@@ -194,7 +194,7 @@
 
         let myBooks = [];
 
-        // Hàm phân tích dữ liệu CSV đã sửa lỗi tách cột hoàn chỉnh
+        // Hàm bóc tách dữ liệu CSV tiêu chuẩn quốc tế ngắn gọn và cực kỳ an toàn
         function parseCSV(text) {
             let lines = text.split(/\r\n|\n/);
             let result = [];
@@ -203,30 +203,17 @@
                 let line = lines[i];
                 if (!line.trim()) continue;
                 
-                let row = [];
-                let insideQuote = false;
-                let entry = "";
-                
-                for (let j = 0; j < line.length; j++) {
-                    let char = line[j];
-                    if (char === '"') {
-                        insideQuote = !insideQuote;
-                    } else if (char === ',' && !insideQuote) {
-                        row.push(entry.trim());
-                        entry = "";
-                    } else {
-                        entry += char;
-                    }
-                }
-                row.push(entry.trim());
+                // Sử dụng biểu thức chính quy chuẩn để bóc tách cột ngăn cách bởi dấu phẩy
+                let matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+                let row = matches.map(val => val.replace(/^"|"$/g, '').trim());
                 
                 if (row.length >= 5) {
                     result.push({
-                        title: row[0] ? row[0].replace(/['"]+/g, '') : '',
-                        category: row[1] ? row[1].replace(/['"]+/g, '') : '',
-                        author: row[2] ? row[2].replace(/['"]+/g, '') : '',
-                        fileType: row[3] ? row[3].replace(/['"]+/g, '') : '',
-                        imgUrl: row[4] ? row[4].replace(/['"]+/g, '') : ''
+                        title: row[0],
+                        category: row[1],
+                        author: row[2],
+                        fileType: row[3],
+                        imgUrl: row[4]
                     });
                 }
             }
@@ -239,6 +226,7 @@
                 const text = await response.text();
                 const parsedData = parseCSV(text);
                 
+                // Loại bỏ hàng tiêu đề đầu tiên trong Google Sheet
                 myBooks = parsedData.filter(book => 
                     book.title !== '' && 
                     book.title.toLowerCase() !== 'tên sách'
@@ -272,3 +260,8 @@
 
         function checkDuplicateBooks() {
             const titles = myBooks.map(b => b.title.toLowerCase());
+            const duplicates = myBooks.filter((book, index) => titles.indexOf(book.title.toLowerCase()) !== index);
+            const alertBox = document.getElementById('duplicateAlert');
+            if (duplicates.length > 0) {
+                const uniqueDupNames = [...new Set(duplicates.map(b => b.title))];
+                alertBox.innerHTML = `⚠️ <strong>Phát hiện trùng sách:</strong> Bạn đang nhập lặp lại cuốn <b>"${uniqueDupNames.join(', ')}"</b> trên Google Sheet!`;
