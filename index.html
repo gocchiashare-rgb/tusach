@@ -141,8 +141,9 @@
             overflow: hidden;
         }
         .book-card img { width: 100%; height: 100%; object-fit: cover; }
-        .book-info { padding: 12px; text-align: center; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
-        .book-title { font-size: 0.95rem; font-weight: bold; margin: 0; color: #2c3e50; line-height: 1.4; }
+        .book-info { padding: 12px; text-align: center; flex-grow: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .book-title { font-size: 0.95rem; font-weight: bold; margin: 0 0 5px 0; color: #2c3e50; line-height: 1.4; }
+        .book-author { font-size: 0.8rem; color: #7f8c8d; margin: 0; }
         .loading { text-align: center; font-size: 1.2rem; color: #666; margin-top: 100px; }
 
         @media (max-width: 768px) {
@@ -190,7 +191,8 @@
 
     <script>
         const SHEET_ID = '1XnRvJ2RKDeVYuBijmWLPyAseIQQtFbKErof-pl1sZdY';
-        const SPREADSHEET_URL = `https://google.com{SHEET_ID}/pub?output=csv`;
+        // Đã sửa lại đường link tại đây
+        const SPREADSHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/pub?output=csv`;
 
         let myBooks = [];
 
@@ -223,6 +225,8 @@
         async function fetchBooksFromSheet() {
             try {
                 const response = await fetch(SPREADSHEET_URL);
+                if (!response.ok) throw new Error("Mạng có vấn đề hoặc sai đường link.");
+                
                 const text = await response.text();
                 const parsedData = parseCSV(text);
                 
@@ -236,7 +240,7 @@
                 
                 populateFilterOptions();
                 checkDuplicateBooks();
-                handleAllFilters();
+                handleAllFilters(); // Hiển thị sách ra màn hình
             } catch (error) {
                 document.getElementById('loadingText').innerHTML = '❌ Lỗi kết nối dữ liệu. Hãy đảm bảo bạn đã chọn Tệp -> Chia sẻ -> Xuất bản lên web trên Google Sheet!';
                 console.error(error);
@@ -258,10 +262,68 @@
             fileTypes.forEach(f => fileSelect.options[fileSelect.options.length] = new Option(f, f));
         }
 
+        // Bổ sung hoàn thiện hàm kiểm tra trùng sách
         function checkDuplicateBooks() {
             const titles = myBooks.map(b => b.title.toLowerCase());
             const duplicates = myBooks.filter((book, index) => titles.indexOf(book.title.toLowerCase()) !== index);
             const alertBox = document.getElementById('duplicateAlert');
+            
             if (duplicates.length > 0) {
                 const uniqueDupNames = [...new Set(duplicates.map(b => b.title))];
                 alertBox.innerHTML = `⚠️ <strong>Phát hiện trùng sách:</strong> Bạn đang nhập lặp lại cuốn <b>"${uniqueDupNames.join(', ')}"</b> trên Google Sheet!`;
+                alertBox.style.display = 'block';
+            } else {
+                alertBox.style.display = 'none';
+            }
+        }
+
+        // Bổ sung hàm xử lý Lọc (Filter) và Tìm kiếm
+        function handleAllFilters() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const catValue = document.getElementById('categoryFilter').value;
+            const authorValue = document.getElementById('authorFilter').value;
+            const fileValue = document.getElementById('fileFilter').value;
+
+            const filteredBooks = myBooks.filter(book => {
+                const matchSearch = book.title.toLowerCase().includes(searchTerm) || book.author.toLowerCase().includes(searchTerm);
+                const matchCat = catValue === 'all' || book.category === catValue;
+                const matchAuthor = authorValue === 'all' || book.author === authorValue;
+                const matchFile = fileValue === 'all' || book.fileType === fileValue;
+                
+                return matchSearch && matchCat && matchAuthor && matchFile;
+            });
+
+            displayBooks(filteredBooks);
+        }
+
+        // Bổ sung hàm render/hiển thị dữ liệu dạng thẻ HTML
+        function displayBooks(books) {
+            const grid = document.getElementById('bookGrid');
+            grid.innerHTML = '';
+            
+            if (books.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #666; margin-top: 50px;">Không tìm thấy sách nào phù hợp với bộ lọc.</p>';
+                return;
+            }
+
+            books.forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.innerHTML = `
+                    <div class="book-img-container">
+                        <img src="${book.imgUrl}" alt="${book.title}" onerror="this.src='https://via.placeholder.com/180x260?text=No+Cover'">
+                    </div>
+                    <div class="book-info">
+                        <p class="book-title">${book.title}</p>
+                        <p class="book-author">${book.author || 'Đang cập nhật'}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Bắt đầu chạy chương trình khi load web
+        fetchBooksFromSheet();
+    </script>
+</body>
+</html>
