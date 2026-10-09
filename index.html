@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tủ Sách Cá Nhân</title>
+    <title>MY LIB</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -35,11 +35,13 @@
             z-index: 100;
         }
         .sidebar h2 {
-            font-size: 1.3rem;
+            font-size: 1.6rem;
             color: var(--primary-color);
             margin-top: 0;
             margin-bottom: 25px;
             text-align: center;
+            font-weight: 800;
+            letter-spacing: 1px;
         }
         .search-box {
             width: 100%;
@@ -142,7 +144,6 @@
         .book-title { font-size: 0.95rem; font-weight: bold; margin: 0; color: #2c3e50; line-height: 1.4; }
         .loading { text-align: center; font-size: 1.2rem; color: #666; margin-top: 100px; }
 
-        /* Điện thoại di động co giãn ẩn hiện menu mượt mà */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; position: relative; padding: 20px; }
@@ -154,12 +155,10 @@
 
     <!-- THANH MENU DỌC BÊN TRÁI -->
     <aside class="sidebar">
-        <h2>📚 MY LIB </h2>
-        
-        <!-- Ô tìm kiếm tên sách -->
+        <!-- ĐÃ ĐỔI TÊN THÀNH MY LIB Ở ĐÂY -->
+        <h2>📚 MY LIB</h2>
         <input type="text" id="searchBox" class="search-box" placeholder="Tìm tên sách..." oninput="handleAllFilters()">
 
-        <!-- 1. BỘ LỌC THỂ LOẠI (Ở TRÊN) -->
         <div class="filter-group">
             <div class="filter-title">Thể loại</div>
             <select id="categoryFilter" class="filter-select" onchange="handleAllFilters()">
@@ -167,7 +166,6 @@
             </select>
         </div>
 
-        <!-- 2. BỘ LỌC TÁC GIẢ (Ở GIỮA) -->
         <div class="filter-group">
             <div class="filter-title">Tác giả</div>
             <select id="authorFilter" class="filter-select" onchange="handleAllFilters()">
@@ -175,7 +173,6 @@
             </select>
         </div>
 
-        <!-- 3. BỘ LỌC LOẠI FILE (DƯỚI CÙNG) -->
         <div class="filter-group">
             <div class="filter-title">Loại file</div>
             <select id="fileFilter" class="filter-select" onchange="handleAllFilters()">
@@ -192,26 +189,43 @@
     </main>
 
     <script>
-        // ID Google Sheet của bạn
         const SHEET_ID = '1XnRvJ2RKDeVYuBijmWLPyAseIQQtFbKErof-pl1sZdY';
         const SPREADSHEET_URL = `https://google.com{SHEET_ID}/pub?output=csv`;
 
         let myBooks = [];
 
-        // Hàm đọc dữ liệu CSV từ 5 cột
         function parseCSV(text) {
-            let lines = text.split('\n');
+            let lines = text.split(/\r\n|\n/);
             let result = [];
+            
             for (let i = 0; i < lines.length; i++) {
-                // Xử lý dấu phẩy để tách cột chính xác
-                let currentline = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                if (currentline.length >= 5) {
+                let line = lines[i];
+                if (!line) continue;
+                
+                let row = [];
+                let insideQuote = false;
+                let entry = "";
+                
+                for (let j = 0; j < line.length; j++) {
+                    let char = line[j];
+                    if (char === '"') {
+                        insideQuote = !insideQuote;
+                    } else if (char === ',' && !insideQuote) {
+                        row.push(entry.trim());
+                        entry = "";
+                    } else {
+                        entry += char;
+                    }
+                }
+                row.push(entry.trim());
+                
+                if (row.length >= 5) {
                     result.push({
-                        title: currentline[0].replace(/['"]+/g, '').trim(),
-                        category: currentline[1].replace(/['"]+/g, '').trim(),
-                        author: currentline[2].replace(/['"]+/g, '').trim(),
-                        fileType: currentline[3].replace(/['"]+/g, '').trim(),
-                        imgUrl: currentline[4].replace(/['"]+/g, '').trim()
+                        title: row,
+                        category: row,
+                        author: row,
+                        fileType: row,
+                        imgUrl: row
                     });
                 }
             }
@@ -224,7 +238,6 @@
                 const text = await response.text();
                 const parsedData = parseCSV(text);
                 
-                // Loại bỏ dòng tiêu đề đầu tiên trong Sheet
                 myBooks = parsedData.filter(book => 
                     book.title !== '' && 
                     book.title.toLowerCase() !== 'tên sách'
@@ -232,17 +245,15 @@
 
                 document.getElementById('loadingText').style.display = 'none';
                 
-                // Tự động tạo danh sách lựa chọn cho các Bộ lọc dựa theo dữ liệu bạn nhập
                 populateFilterOptions();
                 checkDuplicateBooks();
                 handleAllFilters();
             } catch (error) {
-                document.getElementById('loadingText').innerHTML = '❌ Lỗi kết nối. Hãy đảm bảo bạn đã vào Google Sheet chọn Tệp -> Chia sẻ -> Xuất bản lên web!';
+                document.getElementById('loadingText').innerHTML = '❌ Lỗi kết nối dữ liệu. Hãy đảm bảo bạn đã chọn Tệp -> Chia sẻ -> Xuất bản lên web trên Google Sheet!';
                 console.error(error);
             }
         }
 
-        // Tự động gom các Thể loại, Tác giả, Loại file từ 1000 cuốn sách vào ô chọn (Không bị lặp)
         function populateFilterOptions() {
             const categories = [...new Set(myBooks.map(b => b.category).filter(Boolean))];
             const authors = [...new Set(myBooks.map(b => b.author).filter(Boolean))];
@@ -262,3 +273,4 @@
             const titles = myBooks.map(b => b.title.toLowerCase());
             const duplicates = myBooks.filter((book, index) => titles.indexOf(book.title.toLowerCase()) !== index);
             const alertBox = document.getElementById('duplicateAlert');
+            if (duplicates.length > 0) {
