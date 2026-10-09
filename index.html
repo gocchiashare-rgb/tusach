@@ -120,7 +120,7 @@
 <body>
 
     <header>
-        <h1>📚 Tủ Sách Cá Nhân</h1>
+        <h1>📚 MY LIB </h1>
         <input type="text" id="searchBox" class="search-box" placeholder="Nhập tên sách để tìm nhanh..." oninput="handleFilterAndSearch()">
         <div class="filter-container" id="filterContainer">
             <button class="filter-btn active" data-category="all" onclick="changeCategory('all')">Tất cả</button>
@@ -137,34 +137,52 @@
     </div>
 
     <script>
-        // ĐÃ GẮN SẴN ID FILE GOOGLE SHEET CỦA BẠN VÀO ĐÂY
+        // ID Google Sheet chính xác từ link của bạn
         const SHEET_ID = '1XnRvJ2RKDeVYuBijmWLPyAseIQQtFbKErof-pl1sZdY';
-        const SPREADSHEET_URL = `https://google.com{SHEET_ID}/gviz/tq?tqx=out:json`;
+        // Sử dụng cấu trúc dịch csv để tránh bị kẹt tên Tab tiếng Việt
+        const SPREADSHEET_URL = `https://google.com{SHEET_ID}/pub?output=csv`;
 
         let myBooks = [];
         let currentCategory = 'all';
 
+        // Hàm xử lý chuỗi CSV đơn giản
+        function parseCSV(text) {
+            let lines = text.split('\n');
+            let result = [];
+            for (let i = 0; i < lines.length; i++) {
+                let currentline = lines[i].split(',');
+                if (currentline.length >= 3) {
+                    result.push({
+                        title: currentline[0].replace(/['"]+/g, '').trim(),
+                        category: currentline[1].replace(/['"]+/g, '').trim(),
+                        imgUrl: currentline[2].replace(/['"]+/g, '').trim()
+                    });
+                }
+            }
+            return result;
+        }
+
         async function fetchBooksFromSheet() {
             try {
                 const response = await fetch(SPREADSHEET_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
                 const text = await response.text();
-                const jsonData = JSON.parse(text.substr(47).slice(0, -2));
-                const rows = jsonData.table.rows;
                 
-                // Đọc chính xác cấu trúc dữ liệu từ các cột của bạn
-                myBooks = rows.map(row => {
-                    return {
-                        title: (row.c && row.c[0]) ? String(row.c[0].v).trim() : '',
-                        category: (row.c && row.c[1]) ? String(row.c[1].v).trim() : '',
-                        imgUrl: (row.c && row.c[2]) ? String(row.c[2].v).trim() : ''
-                    };
-                }).filter(book => book.title !== '' && book.title !== 'Tên sách'); // Bỏ dòng trống và dòng tiêu đề
+                // Phân tích dữ liệu dạng CSV nhận về
+                const parsedData = parseCSV(text);
+                
+                // Lọc bỏ dòng tiêu đề đầu tiên và dòng trống
+                myBooks = parsedData.filter(book => 
+                    book.title !== '' && 
+                    book.title.toLowerCase() !== 'tên sách' && 
+                    book.title.toLowerCase() !== 'tên sách thể loại link ảnh'
+                );
 
                 document.getElementById('loadingText').style.display = 'none';
                 checkDuplicateBooks();
                 handleFilterAndSearch();
             } catch (error) {
-                document.getElementById('loadingText').innerHTML = '❌ Lỗi kết nối dữ liệu. Hãy đảm bảo bạn đã bật quyền "Bất kỳ ai có liên kết đều có thể xem" trên Google Sheet!';
+                document.getElementById('loadingText').innerHTML = '❌ Lỗi kết nối dữ liệu nâng cao. Vui lòng vào Google Sheet chọn Tệp -> Chia sẻ -> Xuất bản lên web, hoặc kiểm tra lại file!';
                 console.error(error);
             }
         }
@@ -223,20 +241,8 @@
                 const isDuplicate = titlesMap[book.title.toLowerCase()] > 1;
                 const duplicateTag = isDuplicate ? `<div class="duplicate-tag">Bị Trùng</div>` : '';
 
+                grid.appendChild(card);
+                
                 card.innerHTML = `
                     ${duplicateTag}
                     <div class="book-img-container">
-                        <img src="${book.imgUrl}" alt="${book.title}" onerror="this.src='https://placehold.co'">
-                    </div>
-                    <div class="book-info">
-                        <p class="book-title">${book.title}</p>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        fetchBooksFromSheet();
-    </script>
-</body>
-</html>
