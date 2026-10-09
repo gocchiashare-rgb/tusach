@@ -49,7 +49,7 @@
             font-size: 0.9rem;
             border: 2px solid #ddd;
             border-radius: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             outline: none;
             box-sizing: border-box;
             transition: all 0.3s;
@@ -58,23 +58,51 @@
             border-color: var(--primary-color);
             box-shadow: 0 0 8px rgba(44, 62, 80, 0.15);
         }
+
+        /* NÚT GẠT (TOGGLE SWITCH) SÁCH - TIỂU THUYẾT */
+        .toggle-container {
+            display: flex;
+            margin-bottom: 25px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 4px;
+        }
+        .toggle-container input[type="radio"] {
+            display: none;
+        }
+        .toggle-container label {
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .toggle-container input[type="radio"]:checked + label {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
         
         /* CẤU TRÚC KHỐI BỘ LỌC */
         .filter-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         .filter-title {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: bold;
             color: #7f8c8d;
             text-transform: uppercase;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             letter-spacing: 0.5px;
         }
         .filter-select {
             width: 100%;
-            padding: 10px;
-            font-size: 0.95rem;
+            padding: 9px;
+            font-size: 0.9rem;
             border: 2px solid #edf2f7;
             background-color: #f8fafc;
             border-radius: 8px;
@@ -127,13 +155,6 @@
             transform: translateY(-5px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
-        .duplicate-tag {
-            position: absolute;
-            top: 10px; right: 10px;
-            background-color: var(--warning-color);
-            color: white; padding: 4px 8px;
-            font-size: 0.75rem; font-weight: bold; border-radius: 4px;
-        }
         .book-img-container {
             width: 100%; height: 260px;
             background-color: #eee;
@@ -143,7 +164,13 @@
         .book-card img { width: 100%; height: 100%; object-fit: cover; }
         .book-info { padding: 12px; text-align: center; flex-grow: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .book-title { font-size: 0.95rem; font-weight: bold; margin: 0 0 5px 0; color: #2c3e50; line-height: 1.4; }
-        .book-author { font-size: 0.8rem; color: #7f8c8d; margin: 0; }
+        .book-author { font-size: 0.8rem; color: #7f8c8d; margin: 0 0 5px 0; }
+        .book-meta { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-top: 5px;}
+        
+        /* TAG PHÂN LOẠI & QUỐC GIA */
+        .book-tag { font-size: 0.65rem; background-color: #edf2f7; color: #64748b; padding: 3px 6px; border-radius: 12px; font-weight: 600;}
+        .book-tag.country { background-color: #e0f2fe; color: #0284c7; } /* Màu xanh nhạt cho tag Quốc gia */
+        
         .loading { text-align: center; font-size: 1.2rem; color: #666; margin-top: 100px; }
         .error-msg { text-align: center; font-size: 1.2rem; color: var(--warning-color); margin-top: 100px; font-weight: bold; }
 
@@ -161,43 +188,56 @@
         <h2>📚 MY LIB</h2>
         <input type="text" id="searchBox" class="search-box" placeholder="Tìm tên sách..." oninput="handleAllFilters()">
 
+        <!-- NÚT GẠT (TOGGLE SWITCH) SÁCH - TIỂU THUYẾT -->
+        <div class="toggle-container">
+            <input type="radio" id="type-book" name="mainType" value="SÁCH" checked onchange="handleToggleChange()">
+            <label for="type-book">SÁCH</label>
+
+            <input type="radio" id="type-novel" name="mainType" value="TIỂU THUYẾT" onchange="handleToggleChange()">
+            <label for="type-novel">TIỂU THUYẾT</label>
+        </div>
+
         <div class="filter-group">
             <div class="filter-title">Thể loại</div>
-            <select id="categoryFilter" class="filter-select" onchange="handleAllFilters()">
-                <option value="all">Tất cả thể loại</option>
-            </select>
+            <select id="categoryFilter" class="filter-select" onchange="handleAllFilters()"><option value="all">Tất cả thể loại</option></select>
         </div>
 
         <div class="filter-group">
             <div class="filter-title">Tác giả</div>
-            <select id="authorFilter" class="filter-select" onchange="handleAllFilters()">
-                <option value="all">Tất cả tác giả</option>
-            </select>
+            <select id="authorFilter" class="filter-select" onchange="handleAllFilters()"><option value="all">Tất cả tác giả</option></select>
+        </div>
+
+        <!-- BỘ LỌC QUỐC GIA MỚI -->
+        <div class="filter-group">
+            <div class="filter-title">Quốc gia</div>
+            <select id="countryFilter" class="filter-select" onchange="handleAllFilters()"><option value="all">Tất cả quốc gia</option></select>
         </div>
 
         <div class="filter-group">
             <div class="filter-title">Loại file</div>
-            <select id="fileFilter" class="filter-select" onchange="handleAllFilters()">
-                <option value="all">Tất cả loại file</option>
-            </select>
+            <select id="fileFilter" class="filter-select" onchange="handleAllFilters()"><option value="all">Tất cả loại file</option></select>
         </div>
     </aside>
 
     <!-- KHU VỰC HIỂN THỊ SÁCH BÊN PHẢI -->
     <main class="main-content">
         <div class="duplicate-alert" id="duplicateAlert"></div>
-        <div id="loadingText" class="loading">⏳ Đang tải dữ liệu từ Google Sheet...</div>
+        <div id="loadingText" class="loading">⏳ Đang tải dữ liệu từ 2 kho sách...</div>
         <div class="book-grid" id="bookGrid"></div>
     </main>
 
     <script>
-        // ĐƯỜNG LINK XUẤT BẢN CHÍNH THỨC CỦA BẠN (Dữ liệu CSV)
-        const SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxzG4WNaF9-CfPN4H0bxIsaO0qb6KSoyFGC3_Y3NZzGtaeZ5WFgUT8Kg24i8CD_7elwYed5B0QCBip/pub?output=csv';
+        // MÃ GID ĐÃ ĐƯỢC TÍCH HỢP SẴN
+        const GID_SACH = '255824910';       
+        const GID_TIEUTHUYET = '0'; 
+
+        const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxzG4WNaF9-CfPN4H0bxIsaO0qb6KSoyFGC3_Y3NZzGtaeZ5WFgUT8Kg24i8CD_7elwYed5B0QCBip/pub';
+        const URL_SACH = `${BASE_PUBLISH_URL}?gid=${GID_SACH}&single=true&output=csv`;
+        const URL_TIEUTHUYET = `${BASE_PUBLISH_URL}?gid=${GID_TIEUTHUYET}&single=true&output=csv`;
 
         let myBooks = [];
 
-        // Hàm bóc tách dữ liệu CSV hỗ trợ TỐT tiếng Việt và dấu phẩy trong tên sách
-        function parseCSV(text) {
+        function parseCSV(text, mainTypeLabel) {
             let lines = text.split(/\r\n|\n/);
             let result = [];
             
@@ -221,14 +261,16 @@
                 }
                 row.push(cur.trim());
 
-                if (row.length >= 5) {
+                // Lọc dữ liệu: Cột 0 là Tên, 1 là Thể loại, 2 là Tác giả, 3 là File, 4 là Quốc gia, 5 là Ảnh
+                if (row.length >= 2 && row[0].replace(/^"|"$/g, '').toLowerCase() !== 'tên sách' && row[0].replace(/^"|"$/g, '') !== '') {
                     result.push({
-                        // Loại bỏ dấu ngoặc kép bọc ngoài nếu có
-                        title: row[0].replace(/^"|"$/g, ''),
-                        category: row[1].replace(/^"|"$/g, ''),
-                        author: row[2].replace(/^"|"$/g, ''),
-                        fileType: row[3].replace(/^"|"$/g, ''),
-                        imgUrl: row[4].replace(/^"|"$/g, '')
+                        title: row[0] ? row[0].replace(/^"|"$/g, '') : '',
+                        category: row[1] ? row[1].replace(/^"|"$/g, '') : '',
+                        author: row[2] ? row[2].replace(/^"|"$/g, '') : '',
+                        fileType: row[3] ? row[3].replace(/^"|"$/g, '') : '',
+                        country: row[4] ? row[4].replace(/^"|"$/g, '') : '', // Cột Quốc gia mới
+                        imgUrl: row[5] ? row[5].replace(/^"|"$/g, '') : '',  // Cột Link ảnh đã dịch sang vị trí 6
+                        mainType: mainTypeLabel // Nhãn tự động nhận diện từ Sheet
                     });
                 }
             }
@@ -237,43 +279,68 @@
 
         async function fetchBooksFromSheet() {
             try {
-                // Đảm bảo không bị lưu cache trình duyệt khi fetch dữ liệu mới
-                const response = await fetch(SPREADSHEET_URL + "&t=" + new Date().getTime());
-                if (!response.ok) throw new Error("Mạng có vấn đề hoặc sai đường link.");
+                // Lấy dữ liệu song song từ 2 Sheet cùng lúc giúp web load rất nhanh
+                const [resSach, resTieuThuyet] = await Promise.all([
+                    fetch(URL_SACH + "&t=" + new Date().getTime()),
+                    fetch(URL_TIEUTHUYET + "&t=" + new Date().getTime())
+                ]);
+
+                if (!resSach.ok || !resTieuThuyet.ok) throw new Error("Sai đường link xuất bản của Google Sheet.");
                 
-                const text = await response.text();
-                const parsedData = parseCSV(text);
+                const textSach = await resSach.text();
+                const textTieuThuyet = await resTieuThuyet.text();
                 
-                // Loại bỏ hàng tiêu đề đầu tiên trong Google Sheet (hàng chứa chữ "Tên sách")
-                myBooks = parsedData.filter(book => 
-                    book.title !== '' && 
-                    book.title.toLowerCase() !== 'tên sách'
-                );
+                const parsedSach = parseCSV(textSach, "SÁCH");
+                const parsedTieuThuyet = parseCSV(textTieuThuyet, "TIỂU THUYẾT");
+                
+                // Gộp chung kho sách
+                myBooks = [...parsedSach, ...parsedTieuThuyet];
 
                 document.getElementById('loadingText').style.display = 'none';
                 
                 populateFilterOptions();
                 checkDuplicateBooks();
-                handleAllFilters(); // Hiển thị sách ra màn hình
+                handleAllFilters();
             } catch (error) {
                 document.getElementById('loadingText').className = 'error-msg';
-                document.getElementById('loadingText').innerHTML = '❌ Lỗi kết nối dữ liệu. Xin hãy kiểm tra lại đường truyền mạng hoặc link Google Sheet!';
+                document.getElementById('loadingText').innerHTML = `❌ Lỗi kết nối dữ liệu! Hãy kiểm tra lại file Sheet.`;
                 console.error("Lỗi chi tiết:", error);
             }
         }
 
+        function handleToggleChange() {
+            populateFilterOptions();
+            document.getElementById('categoryFilter').value = 'all';
+            document.getElementById('authorFilter').value = 'all';
+            document.getElementById('countryFilter').value = 'all';
+            document.getElementById('fileFilter').value = 'all';
+            document.getElementById('searchBox').value = '';
+            handleAllFilters();
+        }
+
         function populateFilterOptions() {
-            const categories = [...new Set(myBooks.map(b => b.category).filter(Boolean))];
-            const authors = [...new Set(myBooks.map(b => b.author).filter(Boolean))];
-            const fileTypes = [...new Set(myBooks.map(b => b.fileType).filter(Boolean))];
+            const mainTypeValue = document.querySelector('input[name="mainType"]:checked').value;
+            const booksInCurrentType = myBooks.filter(b => b.mainType === mainTypeValue);
+
+            const categories = [...new Set(booksInCurrentType.map(b => b.category).filter(Boolean))];
+            const authors = [...new Set(booksInCurrentType.map(b => b.author).filter(Boolean))];
+            const countries = [...new Set(booksInCurrentType.map(b => b.country).filter(Boolean))];
+            const fileTypes = [...new Set(booksInCurrentType.map(b => b.fileType).filter(Boolean))];
 
             const catSelect = document.getElementById('categoryFilter');
+            catSelect.innerHTML = '<option value="all">Tất cả thể loại</option>';
             categories.forEach(c => catSelect.options[catSelect.options.length] = new Option(c, c));
 
             const authorSelect = document.getElementById('authorFilter');
+            authorSelect.innerHTML = '<option value="all">Tất cả tác giả</option>';
             authors.forEach(a => authorSelect.options[authorSelect.options.length] = new Option(a, a));
 
+            const countrySelect = document.getElementById('countryFilter');
+            countrySelect.innerHTML = '<option value="all">Tất cả quốc gia</option>';
+            countries.forEach(ct => countrySelect.options[countrySelect.options.length] = new Option(ct, ct));
+
             const fileSelect = document.getElementById('fileFilter');
+            fileSelect.innerHTML = '<option value="all">Tất cả loại file</option>';
             fileTypes.forEach(f => fileSelect.options[fileSelect.options.length] = new Option(f, f));
         }
 
@@ -284,7 +351,7 @@
             
             if (duplicates.length > 0) {
                 const uniqueDupNames = [...new Set(duplicates.map(b => b.title))];
-                alertBox.innerHTML = `⚠️ <strong>Phát hiện trùng sách:</strong> Bạn đang nhập lặp lại cuốn <b>"${uniqueDupNames.join(', ')}"</b> trên Google Sheet!`;
+                alertBox.innerHTML = `⚠️ <strong>Phát hiện trùng sách:</strong> Có vẻ bạn đã nhập lặp lại cuốn <b>"${uniqueDupNames.join(', ')}"</b> trong dữ liệu!`;
                 alertBox.style.display = 'block';
             } else {
                 alertBox.style.display = 'none';
@@ -292,9 +359,11 @@
         }
 
         function handleAllFilters() {
-            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase().trim();
+            const mainTypeValue = document.querySelector('input[name="mainType"]:checked').value;
             const catValue = document.getElementById('categoryFilter').value;
             const authorValue = document.getElementById('authorFilter').value;
+            const countryValue = document.getElementById('countryFilter').value;
             const fileValue = document.getElementById('fileFilter').value;
 
             const filteredBooks = myBooks.filter(book => {
@@ -302,11 +371,15 @@
                 const authorStr = book.author ? book.author.toLowerCase() : '';
                 
                 const matchSearch = titleStr.includes(searchTerm) || authorStr.includes(searchTerm);
-                const matchCat = catValue === 'all' || book.category === catValue;
-                const matchAuthor = authorValue === 'all' || book.author === authorValue;
-                const matchFile = fileValue === 'all' || book.fileType === fileValue;
                 
-                return matchSearch && matchCat && matchAuthor && matchFile;
+                // Thuật toán: Nếu tìm kiếm thì quét TẤT CẢ. Nếu không tìm kiếm thì lọc theo Nút gạt + Bộ lọc
+                const matchType = (searchTerm !== '') ? true : (book.mainType === mainTypeValue);
+                const matchCat = (searchTerm !== '') ? true : (catValue === 'all' || book.category === catValue);
+                const matchAuthor = (searchTerm !== '') ? true : (authorValue === 'all' || book.author === authorValue);
+                const matchCountry = (searchTerm !== '') ? true : (countryValue === 'all' || book.country === countryValue);
+                const matchFile = (searchTerm !== '') ? true : (fileValue === 'all' || book.fileType === fileValue);
+                
+                return matchSearch && matchType && matchCat && matchAuthor && matchCountry && matchFile;
             });
 
             displayBooks(filteredBooks);
@@ -317,11 +390,13 @@
             grid.innerHTML = '';
             
             if (books.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #666; margin-top: 50px;">Không tìm thấy sách nào phù hợp với bộ lọc.</p>';
+                grid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #666; margin-top: 50px;">Không tìm thấy kết quả nào phù hợp.</p>';
                 return;
             }
 
             books.forEach(book => {
+                const countryTag = book.country ? `<span class="book-tag country">${book.country}</span>` : '';
+                
                 const card = document.createElement('div');
                 card.className = 'book-card';
                 card.innerHTML = `
@@ -331,13 +406,16 @@
                     <div class="book-info">
                         <p class="book-title">${book.title}</p>
                         <p class="book-author">${book.author || 'Đang cập nhật'}</p>
+                        <div class="book-meta">
+                            <span class="book-tag">${book.mainType}</span>
+                            ${countryTag}
+                        </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Bắt đầu chạy chương trình khi load web
         fetchBooksFromSheet();
     </script>
 </body>
