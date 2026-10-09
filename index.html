@@ -191,12 +191,12 @@
     </main>
 
     <script>
-        // ĐƯỜNG LINK XUẤT BẢN CHÍNH THỨC (Đã đổi đuôi pubhtml thành pub?output=csv)
+        // ĐƯỜNG LINK XUẤT BẢN CHÍNH THỨC CỦA BẠN (Dữ liệu CSV)
         const SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxzG4WNaF9-CfPN4H0bxIsaO0qb6KSoyFGC3_Y3NZzGtaeZ5WFgUT8Kg24i8CD_7elwYed5B0QCBip/pub?output=csv';
 
         let myBooks = [];
 
-        // Hàm bóc tách dữ liệu CSV tiêu chuẩn quốc tế ngắn gọn và cực kỳ an toàn
+        // Hàm bóc tách dữ liệu CSV hỗ trợ TỐT tiếng Việt và dấu phẩy trong tên sách
         function parseCSV(text) {
             let lines = text.split(/\r\n|\n/);
             let result = [];
@@ -205,17 +205,30 @@
                 let line = lines[i];
                 if (!line.trim()) continue;
                 
-                // Sử dụng biểu thức chính quy chuẩn để bóc tách cột ngăn cách bởi dấu phẩy
-                let matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
-                let row = matches.map(val => val.replace(/^"|"$/g, '').trim());
+                let row = [];
+                let cur = '';
+                let inQuote = false;
                 
+                for (let j = 0; j < line.length; j++) {
+                    if (line[j] === '"') {
+                        inQuote = !inQuote;
+                    } else if (line[j] === ',' && !inQuote) {
+                        row.push(cur.trim());
+                        cur = '';
+                    } else {
+                        cur += line[j];
+                    }
+                }
+                row.push(cur.trim());
+
                 if (row.length >= 5) {
                     result.push({
-                        title: row[0],
-                        category: row[1],
-                        author: row[2],
-                        fileType: row[3],
-                        imgUrl: row[4]
+                        // Loại bỏ dấu ngoặc kép bọc ngoài nếu có
+                        title: row[0].replace(/^"|"$/g, ''),
+                        category: row[1].replace(/^"|"$/g, ''),
+                        author: row[2].replace(/^"|"$/g, ''),
+                        fileType: row[3].replace(/^"|"$/g, ''),
+                        imgUrl: row[4].replace(/^"|"$/g, '')
                     });
                 }
             }
