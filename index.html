@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tủ Sách Cá Nhân Của Tôi</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --warning-color: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.3s;
+        }
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px rgba(44, 62, 80, 0.2);
+        }
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .filter-btn {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        .duplicate-alert {
+            display: none;
+            background-color: #fdf2f2;
+            color: var(--warning-color);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--warning-color);
+            font-weight: 500;
+            text-align: left;
+        }
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .book-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        .duplicate-tag {
+            position: absolute;
+            top: 10px; right: 10px;
+            background-color: var(--warning-color);
+            color: white; padding: 4px 8px;
+            font-size: 0.75rem; font-weight: bold; border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .book-img-container {
+            width: 100%; height: 260px;
+            background-color: #eee;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .book-card img { width: 100%; height: 100%; object-fit: cover; }
+        .book-info { padding: 12px; text-align: center; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        .book-title { font-size: 0.95rem; font-weight: bold; margin: 0; color: #2c3e50; line-height: 1.4; }
+        .loading { text-align: center; font-size: 1.2rem; color: #666; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📚 Tủ Sách Cá Nhân</h1>
+        <input type="text" id="searchBox" class="search-box" placeholder="Nhập tên sách để tìm nhanh..." oninput="handleFilterAndSearch()">
+        <div class="filter-container" id="filterContainer">
+            <button class="filter-btn active" data-category="all" onclick="changeCategory('all')">Tất cả</button>
+            <button class="filter-btn" data-category="Tiểu thuyết" onclick="changeCategory('Tiểu thuyết')">Tiểu thuyết</button>
+            <button class="filter-btn" data-category="Truyện tranh" onclick="changeCategory('Truyện tranh')">Truyện tranh</button>
+            <button class="filter-btn" data-category="Kỹ năng" onclick="changeCategory('Kỹ năng')">Kỹ năng</button>
+        </div>
+    </header>
+
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <div class="duplicate-alert" id="duplicateAlert"></div>
+        <div id="loadingText" class="loading">⏳ Đang tải tủ sách từ Google Sheet...</div>
+        <main class="book-grid" id="bookGrid"></main>
+    </div>
+
+    <script>
+        // ĐÃ GẮN SẴN ID FILE GOOGLE SHEET CỦA BẠN VÀO ĐÂY
+        const SHEET_ID = '1XnRvJ2RKDeVYuBijmWLPyAseIQQtFbKErof-pl1sZdY';
+        const SPREADSHEET_URL = `https://google.com{SHEET_ID}/gviz/tq?tqx=out:json`;
+
+        let myBooks = [];
+        let currentCategory = 'all';
+
+        async function fetchBooksFromSheet() {
+            try {
+                const response = await fetch(SPREADSHEET_URL);
+                const text = await response.text();
+                const jsonData = JSON.parse(text.substr(47).slice(0, -2));
+                const rows = jsonData.table.rows;
+                
+                // Đọc chính xác cấu trúc dữ liệu từ các cột của bạn
+                myBooks = rows.map(row => {
+                    return {
+                        title: (row.c && row.c[0]) ? String(row.c[0].v).trim() : '',
+                        category: (row.c && row.c[1]) ? String(row.c[1].v).trim() : '',
+                        imgUrl: (row.c && row.c[2]) ? String(row.c[2].v).trim() : ''
+                    };
+                }).filter(book => book.title !== '' && book.title !== 'Tên sách'); // Bỏ dòng trống và dòng tiêu đề
+
+                document.getElementById('loadingText').style.display = 'none';
+                checkDuplicateBooks();
+                handleFilterAndSearch();
+            } catch (error) {
+                document.getElementById('loadingText').innerHTML = '❌ Lỗi kết nối dữ liệu. Hãy đảm bảo bạn đã bật quyền "Bất kỳ ai có liên kết đều có thể xem" trên Google Sheet!';
+                console.error(error);
+            }
+        }
+
+        function checkDuplicateBooks() {
+            const titles = myBooks.map(b => b.title.toLowerCase());
+            const duplicates = myBooks.filter((book, index) => titles.indexOf(book.title.toLowerCase()) !== index);
+            const alertBox = document.getElementById('duplicateAlert');
+            if (duplicates.length > 0) {
+                const uniqueDupNames = [...new Set(duplicates.map(b => b.title))];
+                alertBox.innerHTML = `⚠️ <strong>Phát hiện trùng sách:</strong> Bạn đang nhập lặp lại cuốn <b>"${uniqueDupNames.join(', ')}"</b> trên Google Sheet!`;
+                alertBox.style.display = 'block';
+            } else {
+                alertBox.style.display = 'none';
+            }
+        }
+
+        function changeCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if(btn.getAttribute('data-category') === category) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            handleFilterAndSearch();
+        }
+
+        function handleFilterAndSearch() {
+            const searchText = document.getElementById('searchBox').value.trim().toLowerCase();
+            const titlesMap = {};
+            myBooks.forEach(b => {
+                const t = b.title.toLowerCase();
+                titlesMap[t] = (titlesMap[t] || 0) + 1;
+            });
+
+            const filteredBooks = myBooks.filter(book => {
+                const matchCategory = (currentCategory === 'all' || book.category === currentCategory);
+                const matchSearch = book.title.toLowerCase().includes(searchText);
+                return matchCategory && matchSearch;
+            });
+
+            renderGrid(filteredBooks, titlesMap);
+        }
+
+        function renderGrid(booksToShow, titlesMap) {
+            const grid = document.getElementById('bookGrid');
+            grid.innerHTML = '';
+            
+            if (booksToShow.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; margin-top: 30px;">Không tìm thấy cuốn sách nào phù hợp.</div>';
+                return;
+            }
+
+            booksToShow.forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                const isDuplicate = titlesMap[book.title.toLowerCase()] > 1;
+                const duplicateTag = isDuplicate ? `<div class="duplicate-tag">Bị Trùng</div>` : '';
+
+                card.innerHTML = `
+                    ${duplicateTag}
+                    <div class="book-img-container">
+                        <img src="${book.imgUrl}" alt="${book.title}" onerror="this.src='https://placehold.co'">
+                    </div>
+                    <div class="book-info">
+                        <p class="book-title">${book.title}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        fetchBooksFromSheet();
+    </script>
+</body>
+</html>
