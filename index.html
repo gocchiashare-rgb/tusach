@@ -162,14 +162,16 @@
             overflow: hidden;
         }
         .book-card img { width: 100%; height: 100%; object-fit: cover; }
-        .book-info { padding: 12px; text-align: center; flex-grow: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .book-title { font-size: 0.95rem; font-weight: bold; margin: 0 0 5px 0; color: #2c3e50; line-height: 1.4; }
-        .book-author { font-size: 0.8rem; color: #7f8c8d; margin: 0 0 5px 0; }
-        .book-meta { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-top: 5px;}
+        .book-info { padding: 12px; text-align: center; flex-grow: 1; display: flex; align-items: center; justify-content: flex-start; flex-direction: column; }
+        .book-title { font-size: 0.95rem; font-weight: bold; margin: 5px 0; color: #2c3e50; line-height: 1.4; }
+        .book-author { font-size: 0.8rem; color: #7f8c8d; margin: 0 0 10px 0; }
         
-        /* TAG PHÂN LOẠI & QUỐC GIA */
-        .book-tag { font-size: 0.65rem; background-color: #edf2f7; color: #64748b; padding: 3px 6px; border-radius: 12px; font-weight: 600;}
-        .book-tag.country { background-color: #e0f2fe; color: #0284c7; } /* Màu xanh nhạt cho tag Quốc gia */
+        /* CỤM TAG HIỂN THỊ THÔNG TIN */
+        .book-meta { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: auto;}
+        .book-tag { font-size: 0.65rem; padding: 4px 8px; border-radius: 12px; font-weight: 600; white-space: nowrap; }
+        .tag-main { background-color: #e2e8f0; color: #475569; } /* Xám nhạt cho Sách/Tiểu thuyết */
+        .tag-category { background-color: #dbeafe; color: #1d4ed8; } /* Xanh dương cho Thể loại */
+        .tag-file { background-color: #fce7f3; color: #be185d; } /* Hồng nhạt cho Định dạng file */
         
         .loading { text-align: center; font-size: 1.2rem; color: #666; margin-top: 100px; }
         .error-msg { text-align: center; font-size: 1.2rem; color: var(--warning-color); margin-top: 100px; font-weight: bold; }
@@ -207,7 +209,6 @@
             <select id="authorFilter" class="filter-select" onchange="handleAllFilters()"><option value="all">Tất cả tác giả</option></select>
         </div>
 
-        <!-- BỘ LỌC QUỐC GIA MỚI -->
         <div class="filter-group">
             <div class="filter-title">Quốc gia</div>
             <select id="countryFilter" class="filter-select" onchange="handleAllFilters()"><option value="all">Tất cả quốc gia</option></select>
@@ -227,11 +228,11 @@
     </main>
 
     <script>
-        // MÃ GID ĐÃ ĐƯỢC TÍCH HỢP SẴN
+        // MÃ GID CỦA BẠN
         const GID_SACH = '255824910';       
         const GID_TIEUTHUYET = '0'; 
 
-        const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxzG4WNaF9-CfPN4H0bxIsaO0qb6KSoyFGC3_Y3NZzGtaeZ5WFgUT8Kg24i8CD_7elwYed5B0QCBip/pub';
+        const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxzG4WNaF9-CfPN4H0bxForce-CfPN4H0bxIsaO0qb6KSoyFGC3_Y3NZzGtaeZ5WFgUT8Kg24i8CD_7elwYed5B0QCBip/pub';
         const URL_SACH = `${BASE_PUBLISH_URL}?gid=${GID_SACH}&single=true&output=csv`;
         const URL_TIEUTHUYET = `${BASE_PUBLISH_URL}?gid=${GID_TIEUTHUYET}&single=true&output=csv`;
 
@@ -261,16 +262,23 @@
                 }
                 row.push(cur.trim());
 
-                // Lọc dữ liệu: Cột 0 là Tên, 1 là Thể loại, 2 là Tác giả, 3 là File, 4 là Quốc gia, 5 là Ảnh
+                // THỨ TỰ CỘT MỚI: 0:Tên | 1:Thể loại | 2:Tác giả | 3:Loại file | 4:Năm XB | 5:Quốc gia | 6:Link ảnh
                 if (row.length >= 2 && row[0].replace(/^"|"$/g, '').toLowerCase() !== 'tên sách' && row[0].replace(/^"|"$/g, '') !== '') {
+                    
+                    let pubYear = 0;
+                    if (row.length > 4 && row[4]) {
+                        pubYear = parseInt(row[4].replace(/^"|"$/g, '').trim()) || 0;
+                    }
+
                     result.push({
                         title: row[0] ? row[0].replace(/^"|"$/g, '') : '',
                         category: row[1] ? row[1].replace(/^"|"$/g, '') : '',
                         author: row[2] ? row[2].replace(/^"|"$/g, '') : '',
                         fileType: row[3] ? row[3].replace(/^"|"$/g, '') : '',
-                        country: row[4] ? row[4].replace(/^"|"$/g, '') : '', // Cột Quốc gia mới
-                        imgUrl: row[5] ? row[5].replace(/^"|"$/g, '') : '',  // Cột Link ảnh đã dịch sang vị trí 6
-                        mainType: mainTypeLabel // Nhãn tự động nhận diện từ Sheet
+                        publishYear: pubYear, // Cột Năm XB (Vị trí 4)
+                        country: (row.length > 5 && row[5]) ? row[5].replace(/^"|"$/g, '') : '', // Quốc gia bị đẩy xuống 5
+                        imgUrl: (row.length > 6 && row[6]) ? row[6].replace(/^"|"$/g, '') : '',  // Link ảnh đẩy xuống 6
+                        mainType: mainTypeLabel 
                     });
                 }
             }
@@ -279,7 +287,6 @@
 
         async function fetchBooksFromSheet() {
             try {
-                // Lấy dữ liệu song song từ 2 Sheet cùng lúc giúp web load rất nhanh
                 const [resSach, resTieuThuyet] = await Promise.all([
                     fetch(URL_SACH + "&t=" + new Date().getTime()),
                     fetch(URL_TIEUTHUYET + "&t=" + new Date().getTime())
@@ -293,7 +300,6 @@
                 const parsedSach = parseCSV(textSach, "SÁCH");
                 const parsedTieuThuyet = parseCSV(textTieuThuyet, "TIỂU THUYẾT");
                 
-                // Gộp chung kho sách
                 myBooks = [...parsedSach, ...parsedTieuThuyet];
 
                 document.getElementById('loadingText').style.display = 'none';
@@ -372,7 +378,6 @@
                 
                 const matchSearch = titleStr.includes(searchTerm) || authorStr.includes(searchTerm);
                 
-                // Thuật toán: Nếu tìm kiếm thì quét TẤT CẢ. Nếu không tìm kiếm thì lọc theo Nút gạt + Bộ lọc
                 const matchType = (searchTerm !== '') ? true : (book.mainType === mainTypeValue);
                 const matchCat = (searchTerm !== '') ? true : (catValue === 'all' || book.category === catValue);
                 const matchAuthor = (searchTerm !== '') ? true : (authorValue === 'all' || book.author === authorValue);
@@ -381,6 +386,9 @@
                 
                 return matchSearch && matchType && matchCat && matchAuthor && matchCountry && matchFile;
             });
+
+            // SẮP XẾP SÁCH MỚI NHẤT LÊN ĐẦU DỰA VÀO NĂM XUẤT BẢN
+            filteredBooks.sort((a, b) => b.publishYear - a.publishYear);
 
             displayBooks(filteredBooks);
         }
@@ -395,7 +403,9 @@
             }
 
             books.forEach(book => {
-                const countryTag = book.country ? `<span class="book-tag country">${book.country}</span>` : '';
+                // Chỉ hiển thị Tag nếu có dữ liệu
+                const categoryTag = book.category ? `<span class="book-tag tag-category">${book.category}</span>` : '';
+                const fileTag = book.fileType ? `<span class="book-tag tag-file">${book.fileType}</span>` : '';
                 
                 const card = document.createElement('div');
                 card.className = 'book-card';
@@ -406,9 +416,12 @@
                     <div class="book-info">
                         <p class="book-title">${book.title}</p>
                         <p class="book-author">${book.author || 'Đang cập nhật'}</p>
+                        
+                        <!-- 3 HIỂN THỊ MỚI NHƯ YÊU CẦU CỦA BẠN -->
                         <div class="book-meta">
-                            <span class="book-tag">${book.mainType}</span>
-                            ${countryTag}
+                            <span class="book-tag tag-main">${book.mainType}</span>
+                            ${categoryTag}
+                            ${fileTag}
                         </div>
                     </div>
                 `;
