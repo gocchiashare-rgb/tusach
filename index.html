@@ -167,10 +167,11 @@
         .book-author { font-size: 0.8rem; color: #7f8c8d; margin: 0 0 10px 0; }
         
         /* CỤM TAG & NÚT AFFILIATE */
-        .book-meta { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px;}
-        .book-tag { font-size: 0.65rem; padding: 4px 8px; border-radius: 12px; font-weight: 600; white-space: nowrap; }
+        .book-meta { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px;}
+        .book-tag { font-size: 0.65rem; padding: 4px 8px; border-radius: 12px; font-weight: 600; white-space: nowrap; cursor: default; }
         .tag-main { background-color: #e2e8f0; color: #475569; } 
         .tag-category { background-color: #dbeafe; color: #1d4ed8; } 
+        .tag-more { background-color: #e0e7ff; color: #3730a3; } 
         .tag-file { background-color: #fce7f3; color: #be185d; } 
         
         .btn-info {
@@ -276,7 +277,6 @@
                 }
                 row.push(cur.trim());
 
-                // THỨ TỰ CỘT HIỆN TẠI: 0:Tên | 1:Thể loại | 2:Tác giả | 3:Loại file | 4:Năm XB | 5:Quốc gia | 6:Link ảnh | 7:Link Affiliate
                 if (row.length >= 2 && row[0].replace(/^"|"$/g, '').toLowerCase() !== 'tên sách' && row[0].replace(/^"|"$/g, '') !== '') {
                     
                     let pubYear = 0;
@@ -286,13 +286,13 @@
 
                     result.push({
                         title: row[0] ? row[0].replace(/^"|"$/g, '') : '',
-                        category: row[1] ? row[1].replace(/^"|"$/g, '') : '',
+                        category: row[1] ? row[1].replace(/^"|"$/g, '') : '', 
                         author: row[2] ? row[2].replace(/^"|"$/g, '') : '',
                         fileType: row[3] ? row[3].replace(/^"|"$/g, '') : '',
                         publishYear: pubYear,
                         country: (row.length > 5 && row[5]) ? row[5].replace(/^"|"$/g, '') : '', 
                         imgUrl: (row.length > 6 && row[6]) ? row[6].replace(/^"|"$/g, '') : '',  
-                        affiliateLink: (row.length > 7 && row[7]) ? row[7].replace(/^"|"$/g, '') : '', // Cột 7 chứa Link Affiliate
+                        affiliateLink: (row.length > 7 && row[7]) ? row[7].replace(/^"|"$/g, '') : '',
                         mainType: mainTypeLabel 
                     });
                 }
@@ -343,10 +343,20 @@
             const mainTypeValue = document.querySelector('input[name="mainType"]:checked').value;
             const booksInCurrentType = myBooks.filter(b => b.mainType === mainTypeValue);
 
-            const categories = [...new Set(booksInCurrentType.map(b => b.category).filter(Boolean))];
-            const authors = [...new Set(booksInCurrentType.map(b => b.author).filter(Boolean))];
-            const countries = [...new Set(booksInCurrentType.map(b => b.country).filter(Boolean))];
-            const fileTypes = [...new Set(booksInCurrentType.map(b => b.fileType).filter(Boolean))];
+            // ==========================================
+            // CẬP NHẬT MỚI: DANH SÁCH THỂ LOẠI TĨNH
+            // ==========================================
+            let categories = [];
+            if (mainTypeValue === 'SÁCH') {
+                categories = ['Kỹ năng sống', 'Kinh doanh', 'Tâm lý học', 'Triết học', 'Lịch sử', 'Khoa học', 'Hồi ký', 'Văn hóa - Xã hội'];
+            } else {
+                categories = ['Trinh thám', 'Kinh dị', 'Tâm lý', 'Lãng mạn', 'Giả tưởng', 'Viễn tưởng', 'Cổ trang', 'Hành động', 'Hài hước', 'Đời thường'];
+            }
+            
+            // Tác giả, Quốc gia, Loại file vẫn tự động lấy từ dữ liệu
+            const authors = [...new Set(booksInCurrentType.map(b => b.author).filter(Boolean))].sort();
+            const countries = [...new Set(booksInCurrentType.map(b => b.country).filter(Boolean))].sort();
+            const fileTypes = [...new Set(booksInCurrentType.map(b => b.fileType).filter(Boolean))].sort();
 
             const catSelect = document.getElementById('categoryFilter');
             catSelect.innerHTML = '<option value="all">Tất cả thể loại</option>';
@@ -394,8 +404,6 @@
                 const countryStr = book.country ? book.country.toLowerCase() : '';
                 const yearStr = book.publishYear ? book.publishYear.toString() : '';
                 
-                // === THUẬT TOÁN TÌM KIẾM ĐA NĂNG (OMNI-SEARCH) ===
-                // Lục tìm trong: Tên sách HOẶC Tác giả HOẶC Thể loại HOẶC Quốc gia HOẶC Năm xuất bản
                 const matchSearch = titleStr.includes(searchTerm) || 
                                     authorStr.includes(searchTerm) || 
                                     catStr.includes(searchTerm) || 
@@ -403,7 +411,19 @@
                                     yearStr.includes(searchTerm);
                 
                 const matchType = (searchTerm !== '') ? true : (book.mainType === mainTypeValue);
-                const matchCat = (searchTerm !== '') ? true : (catValue === 'all' || book.category === catValue);
+                
+                let matchCat = true;
+                if (searchTerm === '' && catValue !== 'all') {
+                    if (book.category) {
+                        // Tách mảng thể loại bằng dấu phẩy và xóa khoảng trắng 2 bên
+                        let catArray = book.category.split(',').map(c => c.trim());
+                        // So sánh chính xác thể loại chọn với mảng thể loại của sách
+                        matchCat = catArray.includes(catValue);
+                    } else {
+                        matchCat = false;
+                    }
+                }
+                
                 const matchAuthor = (searchTerm !== '') ? true : (authorValue === 'all' || book.author === authorValue);
                 const matchCountry = (searchTerm !== '') ? true : (countryValue === 'all' || book.country === countryValue);
                 const matchFile = (searchTerm !== '') ? true : (fileValue === 'all' || book.fileType === fileValue);
@@ -411,7 +431,6 @@
                 return matchSearch && matchType && matchCat && matchAuthor && matchCountry && matchFile;
             });
 
-            // SẮP XẾP SÁCH MỚI NHẤT LÊN ĐẦU DỰA VÀO NĂM XUẤT BẢN
             filteredBooks.sort((a, b) => b.publishYear - a.publishYear);
 
             displayBooks(filteredBooks);
@@ -426,11 +445,36 @@
                 return;
             }
 
+            const currentCatFilter = document.getElementById('categoryFilter').value;
+            const currentSearchTerm = document.getElementById('searchBox').value.toLowerCase().trim();
+
             books.forEach(book => {
-                const categoryTag = book.category ? `<span class="book-tag tag-category">${book.category}</span>` : '';
+                let categoryTagsHTML = '';
+                if (book.category) {
+                    let catArray = book.category.split(',').map(c => c.trim());
+                    let firstCat = catArray[0];
+
+                    if (currentCatFilter !== 'all' && catArray.includes(currentCatFilter)) {
+                        firstCat = currentCatFilter;
+                    } 
+                    else if (currentSearchTerm !== '') {
+                        let matchedCat = catArray.find(c => c.toLowerCase().includes(currentSearchTerm));
+                        if (matchedCat) {
+                            firstCat = matchedCat;
+                        }
+                    }
+
+                    let moreCount = catArray.length - 1;
+                    
+                    categoryTagsHTML = `<span class="book-tag tag-category" title="Tất cả thể loại: ${book.category}">${firstCat}</span>`;
+                    
+                    if (moreCount > 0) {
+                        categoryTagsHTML += `<span class="book-tag tag-more" title="Tất cả thể loại: ${book.category}">+${moreCount}</span>`;
+                    }
+                }
+
                 const fileTag = book.fileType ? `<span class="book-tag tag-file">${book.fileType}</span>` : '';
                 
-                // Kiểm tra xem có Link Affiliate không, nếu có thì hiện Nút, không có thì bỏ qua
                 const affiliateBtn = book.affiliateLink 
                     ? `<a href="${book.affiliateLink}" target="_blank" class="btn-info">Thông tin</a>` 
                     : '';
@@ -448,7 +492,7 @@
                             
                             <div class="book-meta">
                                 <span class="book-tag tag-main">${book.mainType}</span>
-                                ${categoryTag}
+                                ${categoryTagsHTML}
                                 ${fileTag}
                             </div>
                         </div>
