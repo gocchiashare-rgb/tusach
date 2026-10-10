@@ -59,7 +59,7 @@
             box-shadow: 0 0 8px rgba(44, 62, 80, 0.15);
         }
 
-        /* NÚT GẠT (TOGGLE SWITCH) SÁCH - TIỂU THUYẾT */
+        /* NÚT GẠT SÁCH - TIỂU THUYẾT */
         .toggle-container {
             display: flex;
             margin-bottom: 25px;
@@ -162,16 +162,34 @@
             overflow: hidden;
         }
         .book-card img { width: 100%; height: 100%; object-fit: cover; }
-        .book-info { padding: 12px; text-align: center; flex-grow: 1; display: flex; align-items: center; justify-content: flex-start; flex-direction: column; }
-        .book-title { font-size: 0.95rem; font-weight: bold; margin: 5px 0; color: #2c3e50; line-height: 1.4; }
+        .book-info { padding: 15px 12px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+        .book-title { font-size: 0.95rem; font-weight: bold; margin: 0 0 5px 0; color: #2c3e50; line-height: 1.4; }
         .book-author { font-size: 0.8rem; color: #7f8c8d; margin: 0 0 10px 0; }
         
-        /* CỤM TAG HIỂN THỊ THÔNG TIN */
-        .book-meta { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: auto;}
+        /* CỤM TAG & NÚT AFFILIATE */
+        .book-meta { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px;}
         .book-tag { font-size: 0.65rem; padding: 4px 8px; border-radius: 12px; font-weight: 600; white-space: nowrap; }
-        .tag-main { background-color: #e2e8f0; color: #475569; } /* Xám nhạt cho Sách/Tiểu thuyết */
-        .tag-category { background-color: #dbeafe; color: #1d4ed8; } /* Xanh dương cho Thể loại */
-        .tag-file { background-color: #fce7f3; color: #be185d; } /* Hồng nhạt cho Định dạng file */
+        .tag-main { background-color: #e2e8f0; color: #475569; } 
+        .tag-category { background-color: #dbeafe; color: #1d4ed8; } 
+        .tag-file { background-color: #fce7f3; color: #be185d; } 
+        
+        .btn-info {
+            display: inline-block;
+            width: 80%;
+            padding: 8px 0;
+            background-color: var(--primary-color);
+            color: #ffffff !important;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 20px;
+            transition: all 0.2s;
+            margin-top: auto;
+        }
+        .btn-info:hover {
+            background-color: #1a252f;
+            box-shadow: 0 4px 8px rgba(44, 62, 80, 0.2);
+        }
         
         .loading { text-align: center; font-size: 1.2rem; color: #666; margin-top: 100px; }
         .error-msg { text-align: center; font-size: 1.2rem; color: var(--warning-color); margin-top: 100px; font-weight: bold; }
@@ -185,12 +203,10 @@
 </head>
 <body>
 
-    <!-- THANH MENU DỌC BÊN TRÁI -->
     <aside class="sidebar">
         <h2>📚 MY LIB</h2>
-        <input type="text" id="searchBox" class="search-box" placeholder="Tìm tên sách..." oninput="handleAllFilters()">
+        <input type="text" id="searchBox" class="search-box" placeholder="Tìm kiếm mọi thứ..." oninput="handleAllFilters()">
 
-        <!-- NÚT GẠT (TOGGLE SWITCH) SÁCH - TIỂU THUYẾT -->
         <div class="toggle-container">
             <input type="radio" id="type-book" name="mainType" value="SÁCH" checked onchange="handleToggleChange()">
             <label for="type-book">SÁCH</label>
@@ -220,7 +236,6 @@
         </div>
     </aside>
 
-    <!-- KHU VỰC HIỂN THỊ SÁCH BÊN PHẢI -->
     <main class="main-content">
         <div class="duplicate-alert" id="duplicateAlert"></div>
         <div id="loadingText" class="loading">⏳ Đang tải dữ liệu từ 2 kho sách...</div>
@@ -228,11 +243,9 @@
     </main>
 
     <script>
-        // MÃ GID CỦA BẠN
         const GID_SACH = '255824910';       
         const GID_TIEUTHUYET = '0'; 
 
-        // Đã sửa lại đường link chính xác (loại bỏ phần chữ bị thừa)
         const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxzG4WNaF9-CfPN4H0bxIsaO0qb6KSoyFGC3_Y3NZzGtaeZ5WFgUT8Kg24i8CD_7elwYed5B0QCBip/pub';
         const URL_SACH = `${BASE_PUBLISH_URL}?gid=${GID_SACH}&single=true&output=csv`;
         const URL_TIEUTHUYET = `${BASE_PUBLISH_URL}?gid=${GID_TIEUTHUYET}&single=true&output=csv`;
@@ -263,7 +276,7 @@
                 }
                 row.push(cur.trim());
 
-                // THỨ TỰ CỘT MỚI: 0:Tên | 1:Thể loại | 2:Tác giả | 3:Loại file | 4:Năm XB | 5:Quốc gia | 6:Link ảnh
+                // THỨ TỰ CỘT HIỆN TẠI: 0:Tên | 1:Thể loại | 2:Tác giả | 3:Loại file | 4:Năm XB | 5:Quốc gia | 6:Link ảnh | 7:Link Affiliate
                 if (row.length >= 2 && row[0].replace(/^"|"$/g, '').toLowerCase() !== 'tên sách' && row[0].replace(/^"|"$/g, '') !== '') {
                     
                     let pubYear = 0;
@@ -276,9 +289,10 @@
                         category: row[1] ? row[1].replace(/^"|"$/g, '') : '',
                         author: row[2] ? row[2].replace(/^"|"$/g, '') : '',
                         fileType: row[3] ? row[3].replace(/^"|"$/g, '') : '',
-                        publishYear: pubYear, // Cột Năm XB (Vị trí 4)
-                        country: (row.length > 5 && row[5]) ? row[5].replace(/^"|"$/g, '') : '', // Quốc gia bị đẩy xuống 5
-                        imgUrl: (row.length > 6 && row[6]) ? row[6].replace(/^"|"$/g, '') : '',  // Link ảnh đẩy xuống 6
+                        publishYear: pubYear,
+                        country: (row.length > 5 && row[5]) ? row[5].replace(/^"|"$/g, '') : '', 
+                        imgUrl: (row.length > 6 && row[6]) ? row[6].replace(/^"|"$/g, '') : '',  
+                        affiliateLink: (row.length > 7 && row[7]) ? row[7].replace(/^"|"$/g, '') : '', // Cột 7 chứa Link Affiliate
                         mainType: mainTypeLabel 
                     });
                 }
@@ -376,8 +390,17 @@
             const filteredBooks = myBooks.filter(book => {
                 const titleStr = book.title ? book.title.toLowerCase() : '';
                 const authorStr = book.author ? book.author.toLowerCase() : '';
+                const catStr = book.category ? book.category.toLowerCase() : '';
+                const countryStr = book.country ? book.country.toLowerCase() : '';
+                const yearStr = book.publishYear ? book.publishYear.toString() : '';
                 
-                const matchSearch = titleStr.includes(searchTerm) || authorStr.includes(searchTerm);
+                // === THUẬT TOÁN TÌM KIẾM ĐA NĂNG (OMNI-SEARCH) ===
+                // Lục tìm trong: Tên sách HOẶC Tác giả HOẶC Thể loại HOẶC Quốc gia HOẶC Năm xuất bản
+                const matchSearch = titleStr.includes(searchTerm) || 
+                                    authorStr.includes(searchTerm) || 
+                                    catStr.includes(searchTerm) || 
+                                    countryStr.includes(searchTerm) || 
+                                    yearStr.includes(searchTerm);
                 
                 const matchType = (searchTerm !== '') ? true : (book.mainType === mainTypeValue);
                 const matchCat = (searchTerm !== '') ? true : (catValue === 'all' || book.category === catValue);
@@ -404,9 +427,13 @@
             }
 
             books.forEach(book => {
-                // Chỉ hiển thị Tag nếu có dữ liệu
                 const categoryTag = book.category ? `<span class="book-tag tag-category">${book.category}</span>` : '';
                 const fileTag = book.fileType ? `<span class="book-tag tag-file">${book.fileType}</span>` : '';
+                
+                // Kiểm tra xem có Link Affiliate không, nếu có thì hiện Nút, không có thì bỏ qua
+                const affiliateBtn = book.affiliateLink 
+                    ? `<a href="${book.affiliateLink}" target="_blank" class="btn-info">Thông tin</a>` 
+                    : '';
                 
                 const card = document.createElement('div');
                 card.className = 'book-card';
@@ -415,15 +442,17 @@
                         <img src="${book.imgUrl}" alt="${book.title}" onerror="this.src='https://via.placeholder.com/180x260?text=No+Cover'">
                     </div>
                     <div class="book-info">
-                        <p class="book-title">${book.title}</p>
-                        <p class="book-author">${book.author || 'Đang cập nhật'}</p>
-                        
-                        <!-- 3 HIỂN THỊ MỚI NHƯ YÊU CẦU CỦA BẠN -->
-                        <div class="book-meta">
-                            <span class="book-tag tag-main">${book.mainType}</span>
-                            ${categoryTag}
-                            ${fileTag}
+                        <div>
+                            <p class="book-title">${book.title}</p>
+                            <p class="book-author">${book.author || 'Đang cập nhật'}</p>
+                            
+                            <div class="book-meta">
+                                <span class="book-tag tag-main">${book.mainType}</span>
+                                ${categoryTag}
+                                ${fileTag}
+                            </div>
                         </div>
+                        ${affiliateBtn}
                     </div>
                 `;
                 grid.appendChild(card);
