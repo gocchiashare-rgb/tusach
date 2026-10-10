@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MY LIB</title>
+    <title>MY LIB - Thư Viện Của Tôi</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -21,7 +21,6 @@
             display: flex;
         }
         
-        /* THANH MENU DỌC BÊN TRÁI */
         .sidebar {
             width: var(--sidebar-width);
             background-color: #ffffff;
@@ -59,7 +58,6 @@
             box-shadow: 0 0 8px rgba(44, 62, 80, 0.15);
         }
 
-        /* NÚT GẠT SÁCH - TIỂU THUYẾT */
         .toggle-container {
             display: flex;
             margin-bottom: 25px;
@@ -67,130 +65,57 @@
             border-radius: 8px;
             padding: 4px;
         }
-        .toggle-container input[type="radio"] {
-            display: none;
-        }
+        .toggle-container input[type="radio"] { display: none; }
         .toggle-container label {
-            flex: 1;
-            text-align: center;
-            padding: 8px 0;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #64748b;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s ease;
+            flex: 1; text-align: center; padding: 8px 0; font-size: 0.85rem;
+            font-weight: 600; color: #64748b; cursor: pointer; border-radius: 6px; transition: all 0.2s ease;
         }
         .toggle-container input[type="radio"]:checked + label {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--primary-color); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        /* CẤU TRÚC KHỐI BỘ LỌC */
-        .filter-group {
-            margin-bottom: 20px;
-        }
-        .filter-title {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #7f8c8d;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-        }
-        .filter-select {
-            width: 100%;
-            padding: 9px;
-            font-size: 0.9rem;
-            border: 2px solid #edf2f7;
-            background-color: #f8fafc;
-            border-radius: 8px;
-            outline: none;
-            color: #4a5568;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .filter-select:focus {
-            border-color: var(--primary-color);
-        }
+        .filter-group { margin-bottom: 20px; }
+        .filter-title { font-size: 0.85rem; font-weight: bold; color: #7f8c8d; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .filter-select { width: 100%; padding: 9px; font-size: 0.9rem; border: 2px solid #edf2f7; background-color: #f8fafc; border-radius: 8px; outline: none; color: #4a5568; cursor: pointer; transition: all 0.2s; box-sizing: border-box;}
+        .filter-select:focus { border-color: var(--primary-color); }
 
-        /* KHU VỰC HIỂN THỊ CHÍNH BÊN PHẢI */
+        /* CSS MỚI CHO BỘ LỌC TÌM KIẾM ĐỀ XUẤT (AUTOCOMPLETE) */
+        .autocomplete-wrapper { position: relative; }
+        .autocomplete-items {
+            position: absolute; border: 1px solid #edf2f7; border-top: none; z-index: 99;
+            top: 100%; left: 0; right: 0; background: #ffffff; max-height: 200px; overflow-y: auto;
+            border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none;
+        }
+        .autocomplete-items div { padding: 10px 12px; cursor: pointer; font-size: 0.9rem; color: #94a3b8; transition: background 0.2s; }
+        .autocomplete-items div:hover { background-color: #f1f5f9; }
+        /* Tô đậm chữ cái trùng khớp */
+        .autocomplete-items div strong { color: var(--primary-color); font-weight: 800; }
+
         .main-content {
-            margin-left: var(--sidebar-width);
-            flex-grow: 1;
-            padding: 40px;
-            box-sizing: border-box;
-            min-height: 100vh;
+            margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; box-sizing: border-box; min-height: 100vh;
         }
-        .duplicate-alert {
-            display: none;
-            background-color: #fdf2f2;
-            color: var(--warning-color);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            border-left: 5px solid var(--warning-color);
-            font-weight: 500;
-            text-align: left;
-        }
-        .book-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .book-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-        .book-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-        .book-img-container {
-            width: 100%; height: 260px;
-            background-color: #eee;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
+        .duplicate-alert { display: none; background-color: #fdf2f2; color: var(--warning-color); padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 5px solid var(--warning-color); font-weight: 500; text-align: left; }
+        
+        .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .book-card { background-color: var(--card-bg); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; position: relative; }
+        .book-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+        .book-img-container { width: 100%; height: 260px; background-color: #eee; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .book-card img { width: 100%; height: 100%; object-fit: cover; }
+        
         .book-info { padding: 15px 12px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
         .book-title { font-size: 0.95rem; font-weight: bold; margin: 0 0 5px 0; color: #2c3e50; line-height: 1.4; }
         .book-author { font-size: 0.8rem; color: #7f8c8d; margin: 0 0 10px 0; }
         
-        /* CỤM TAG & NÚT AFFILIATE */
         .book-meta { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px;}
         .book-tag { font-size: 0.65rem; padding: 4px 8px; border-radius: 12px; font-weight: 600; white-space: nowrap; cursor: default; }
         .tag-main { background-color: #e2e8f0; color: #475569; } 
         .tag-category { background-color: #dbeafe; color: #1d4ed8; } 
         .tag-more { background-color: #e0e7ff; color: #3730a3; } 
         .tag-file { background-color: #fce7f3; color: #be185d; } 
+        .tag-file-more { background-color: #fce7f3; color: #be185d; opacity: 0.8;}
         
-        .btn-info {
-            display: inline-block;
-            width: 80%;
-            padding: 8px 0;
-            background-color: var(--primary-color);
-            color: #ffffff !important;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: bold;
-            border-radius: 20px;
-            transition: all 0.2s;
-            margin-top: auto;
-        }
-        .btn-info:hover {
-            background-color: #1a252f;
-            box-shadow: 0 4px 8px rgba(44, 62, 80, 0.2);
-        }
+        .btn-info { display: inline-block; width: 80%; padding: 8px 0; background-color: var(--primary-color); color: #ffffff !important; text-decoration: none; font-size: 0.85rem; font-weight: bold; border-radius: 20px; transition: all 0.2s; margin-top: auto; }
+        .btn-info:hover { background-color: #1a252f; box-shadow: 0 4px 8px rgba(44, 62, 80, 0.2); }
         
         .loading { text-align: center; font-size: 1.2rem; color: #666; margin-top: 100px; }
         .error-msg { text-align: center; font-size: 1.2rem; color: var(--warning-color); margin-top: 100px; font-weight: bold; }
@@ -211,7 +136,6 @@
         <div class="toggle-container">
             <input type="radio" id="type-book" name="mainType" value="SÁCH" checked onchange="handleToggleChange()">
             <label for="type-book">SÁCH</label>
-
             <input type="radio" id="type-novel" name="mainType" value="TIỂU THUYẾT" onchange="handleToggleChange()">
             <label for="type-novel">TIỂU THUYẾT</label>
         </div>
@@ -221,14 +145,18 @@
             <select id="categoryFilter" class="filter-select" onchange="handleAllFilters()"><option value="all">Tất cả thể loại</option></select>
         </div>
 
-        <div class="filter-group">
+        <!-- BỘ LỌC TÁC GIẢ MỚI (AUTOCOMPLETE) -->
+        <div class="filter-group autocomplete-wrapper">
             <div class="filter-title">Tác giả</div>
-            <select id="authorFilter" class="filter-select" onchange="handleAllFilters()"><option value="all">Tất cả tác giả</option></select>
+            <input type="text" id="authorSearchInput" class="filter-select" placeholder="Nhập hoặc chọn..." autocomplete="off">
+            <div id="authorDropdown" class="autocomplete-items"></div>
         </div>
 
-        <div class="filter-group">
+        <!-- BỘ LỌC QUỐC GIA MỚI (AUTOCOMPLETE) -->
+        <div class="filter-group autocomplete-wrapper">
             <div class="filter-title">Quốc gia</div>
-            <select id="countryFilter" class="filter-select" onchange="handleAllFilters()"><option value="all">Tất cả quốc gia</option></select>
+            <input type="text" id="countrySearchInput" class="filter-select" placeholder="Nhập hoặc chọn..." autocomplete="off">
+            <div id="countryDropdown" class="autocomplete-items"></div>
         </div>
 
         <div class="filter-group">
@@ -246,49 +174,39 @@
     <script>
         const GID_SACH = '255824910';       
         const GID_TIEUTHUYET = '0'; 
-
         const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxzG4WNaF9-CfPN4H0bxIsaO0qb6KSoyFGC3_Y3NZzGtaeZ5WFgUT8Kg24i8CD_7elwYed5B0QCBip/pub';
         const URL_SACH = `${BASE_PUBLISH_URL}?gid=${GID_SACH}&single=true&output=csv`;
         const URL_TIEUTHUYET = `${BASE_PUBLISH_URL}?gid=${GID_TIEUTHUYET}&single=true&output=csv`;
 
         let myBooks = [];
+        let globalAuthors = [];
+        let globalCountries = [];
 
         function parseCSV(text, mainTypeLabel) {
             let lines = text.split(/\r\n|\n/);
             let result = [];
-            
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i];
                 if (!line.trim()) continue;
-                
                 let row = [];
                 let cur = '';
                 let inQuote = false;
-                
                 for (let j = 0; j < line.length; j++) {
-                    if (line[j] === '"') {
-                        inQuote = !inQuote;
-                    } else if (line[j] === ',' && !inQuote) {
-                        row.push(cur.trim());
-                        cur = '';
-                    } else {
-                        cur += line[j];
-                    }
+                    if (line[j] === '"') { inQuote = !inQuote; } 
+                    else if (line[j] === ',' && !inQuote) { row.push(cur.trim()); cur = ''; } 
+                    else { cur += line[j]; }
                 }
                 row.push(cur.trim());
 
                 if (row.length >= 2 && row[0].replace(/^"|"$/g, '').toLowerCase() !== 'tên sách' && row[0].replace(/^"|"$/g, '') !== '') {
-                    
                     let pubYear = 0;
-                    if (row.length > 4 && row[4]) {
-                        pubYear = parseInt(row[4].replace(/^"|"$/g, '').trim()) || 0;
-                    }
-
+                    if (row.length > 4 && row[4]) pubYear = parseInt(row[4].replace(/^"|"$/g, '').trim()) || 0;
+                    
                     result.push({
                         title: row[0] ? row[0].replace(/^"|"$/g, '') : '',
                         category: row[1] ? row[1].replace(/^"|"$/g, '') : '', 
                         author: row[2] ? row[2].replace(/^"|"$/g, '') : '',
-                        fileType: row[3] ? row[3].replace(/^"|"$/g, '') : '',
+                        fileType: row[3] ? row[3].replace(/^"|"$/g, '') : '', 
                         publishYear: pubYear,
                         country: (row.length > 5 && row[5]) ? row[5].replace(/^"|"$/g, '') : '', 
                         imgUrl: (row.length > 6 && row[6]) ? row[6].replace(/^"|"$/g, '') : '',  
@@ -306,17 +224,11 @@
                     fetch(URL_SACH + "&t=" + new Date().getTime()),
                     fetch(URL_TIEUTHUYET + "&t=" + new Date().getTime())
                 ]);
-
-                if (!resSach.ok || !resTieuThuyet.ok) throw new Error("Sai đường link xuất bản của Google Sheet.");
-                
+                if (!resSach.ok || !resTieuThuyet.ok) throw new Error("Lỗi đường link");
                 const textSach = await resSach.text();
                 const textTieuThuyet = await resTieuThuyet.text();
                 
-                const parsedSach = parseCSV(textSach, "SÁCH");
-                const parsedTieuThuyet = parseCSV(textTieuThuyet, "TIỂU THUYẾT");
-                
-                myBooks = [...parsedSach, ...parsedTieuThuyet];
-
+                myBooks = [...parseCSV(textSach, "SÁCH"), ...parseCSV(textTieuThuyet, "TIỂU THUYẾT")];
                 document.getElementById('loadingText').style.display = 'none';
                 
                 populateFilterOptions();
@@ -324,18 +236,18 @@
                 handleAllFilters();
             } catch (error) {
                 document.getElementById('loadingText').className = 'error-msg';
-                document.getElementById('loadingText').innerHTML = `❌ Lỗi kết nối dữ liệu! Hãy kiểm tra lại file Sheet.`;
-                console.error("Lỗi chi tiết:", error);
+                document.getElementById('loadingText').innerHTML = `❌ Lỗi kết nối dữ liệu!`;
             }
         }
 
         function handleToggleChange() {
-            populateFilterOptions();
             document.getElementById('categoryFilter').value = 'all';
-            document.getElementById('authorFilter').value = 'all';
-            document.getElementById('countryFilter').value = 'all';
+            document.getElementById('authorSearchInput').value = '';
+            document.getElementById('countrySearchInput').value = '';
             document.getElementById('fileFilter').value = 'all';
             document.getElementById('searchBox').value = '';
+            
+            populateFilterOptions();
             handleAllFilters();
         }
 
@@ -343,58 +255,108 @@
             const mainTypeValue = document.querySelector('input[name="mainType"]:checked').value;
             const booksInCurrentType = myBooks.filter(b => b.mainType === mainTypeValue);
 
-            // ==========================================
-            // CẬP NHẬT MỚI: DANH SÁCH THỂ LOẠI TĨNH
-            // ==========================================
-            let categories = [];
-            if (mainTypeValue === 'SÁCH') {
-                categories = ['Kỹ năng sống', 'Kinh doanh', 'Tâm lý học', 'Triết học', 'Lịch sử', 'Khoa học', 'Hồi ký', 'Văn hóa - Xã hội'];
-            } else {
-                categories = ['Trinh thám', 'Kinh dị', 'Tâm lý', 'Lãng mạn', 'Giả tưởng', 'Viễn tưởng', 'Cổ trang', 'Hành động', 'Hài hước', 'Đời thường'];
-            }
+            let categories = (mainTypeValue === 'SÁCH') 
+                ? ['Kỹ năng sống', 'Kinh doanh', 'Tâm lý học', 'Triết học', 'Lịch sử', 'Khoa học', 'Hồi ký', 'Văn hóa - Xã hội']
+                : ['Trinh thám', 'Kinh dị', 'Tâm lý', 'Lãng mạn', 'Giả tưởng', 'Viễn tưởng', 'Cổ trang', 'Hành động', 'Hài hước', 'Đời thường'];
             
-            // Tác giả, Quốc gia, Loại file vẫn tự động lấy từ dữ liệu
-            const authors = [...new Set(booksInCurrentType.map(b => b.author).filter(Boolean))].sort();
-            const countries = [...new Set(booksInCurrentType.map(b => b.country).filter(Boolean))].sort();
-            const fileTypes = [...new Set(booksInCurrentType.map(b => b.fileType).filter(Boolean))].sort();
+            let allFiles = [];
+            booksInCurrentType.forEach(b => {
+                if (b.fileType) allFiles.push(...b.fileType.split(',').map(f => f.trim()).filter(Boolean));
+            });
+            const fileTypes = [...new Set(allFiles)].sort();
+
+            // Cập nhật danh sách Tác giả & Quốc gia toàn cục (sắp xếp A-Z)
+            globalAuthors = [...new Set(booksInCurrentType.map(b => b.author).filter(Boolean))].sort();
+            globalCountries = [...new Set(booksInCurrentType.map(b => b.country).filter(Boolean))].sort();
 
             const catSelect = document.getElementById('categoryFilter');
             catSelect.innerHTML = '<option value="all">Tất cả thể loại</option>';
             categories.forEach(c => catSelect.options[catSelect.options.length] = new Option(c, c));
 
-            const authorSelect = document.getElementById('authorFilter');
-            authorSelect.innerHTML = '<option value="all">Tất cả tác giả</option>';
-            authors.forEach(a => authorSelect.options[authorSelect.options.length] = new Option(a, a));
-
-            const countrySelect = document.getElementById('countryFilter');
-            countrySelect.innerHTML = '<option value="all">Tất cả quốc gia</option>';
-            countries.forEach(ct => countrySelect.options[countrySelect.options.length] = new Option(ct, ct));
-
             const fileSelect = document.getElementById('fileFilter');
             fileSelect.innerHTML = '<option value="all">Tất cả loại file</option>';
             fileTypes.forEach(f => fileSelect.options[fileSelect.options.length] = new Option(f, f));
+
+            // Kích hoạt Autocomplete
+            setupAutocomplete('authorSearchInput', 'authorDropdown', globalAuthors);
+            setupAutocomplete('countrySearchInput', 'countryDropdown', globalCountries);
         }
+
+        // HÀM XỬ LÝ AUTOCOMPLETE (Hộp thoại đề xuất)
+        function setupAutocomplete(inputId, dropdownId, dataArray) {
+            const input = document.getElementById(inputId);
+            const dropdown = document.getElementById(dropdownId);
+
+            function showOptions(query) {
+                dropdown.innerHTML = '';
+                const safeQuery = query.toLowerCase().trim();
+                let matches = dataArray.filter(item => item.toLowerCase().includes(safeQuery));
+
+                if (matches.length === 0) {
+                    dropdown.style.display = 'none';
+                    return;
+                }
+
+                matches.forEach(item => {
+                    const div = document.createElement('div');
+                    if (safeQuery === '') {
+                        div.innerHTML = item; // Không gõ gì thì hiện bình thường
+                    } else {
+                        // Tìm vị trí chữ được gõ để tô đậm
+                        const startIndex = item.toLowerCase().indexOf(safeQuery);
+                        const matchText = item.substr(startIndex, safeQuery.length);
+                        const beforeText = item.substr(0, startIndex);
+                        const afterText = item.substr(startIndex + safeQuery.length);
+                        
+                        div.innerHTML = `${beforeText}<strong>${matchText}</strong>${afterText}`;
+                    }
+
+                    div.addEventListener('click', function() {
+                        input.value = item;
+                        dropdown.style.display = 'none';
+                        handleAllFilters(); // Tự động lọc sau khi click chọn
+                    });
+                    dropdown.appendChild(div);
+                });
+                dropdown.style.display = 'block';
+            }
+
+            input.addEventListener('input', function() {
+                showOptions(this.value);
+                handleAllFilters(); // Lọc realtime khi đang gõ
+            });
+
+            input.addEventListener('focus', function() {
+                showOptions(this.value);
+            });
+        }
+
+        // Ẩn hộp thoại nếu click ra ngoài
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.autocomplete-wrapper')) {
+                document.querySelectorAll('.autocomplete-items').forEach(el => el.style.display = 'none');
+            }
+        });
 
         function checkDuplicateBooks() {
             const titles = myBooks.map(b => b.title.toLowerCase());
             const duplicates = myBooks.filter((book, index) => titles.indexOf(book.title.toLowerCase()) !== index);
             const alertBox = document.getElementById('duplicateAlert');
-            
             if (duplicates.length > 0) {
                 const uniqueDupNames = [...new Set(duplicates.map(b => b.title))];
-                alertBox.innerHTML = `⚠️ <strong>Phát hiện trùng sách:</strong> Có vẻ bạn đã nhập lặp lại cuốn <b>"${uniqueDupNames.join(', ')}"</b> trong dữ liệu!`;
+                alertBox.innerHTML = `⚠️ <strong>Phát hiện trùng sách:</strong> Có vẻ bạn đã nhập lặp lại cuốn <b>"${uniqueDupNames.join(', ')}"</b>!`;
                 alertBox.style.display = 'block';
-            } else {
-                alertBox.style.display = 'none';
-            }
+            } else { alertBox.style.display = 'none'; }
         }
 
         function handleAllFilters() {
             const searchTerm = document.getElementById('searchBox').value.toLowerCase().trim();
             const mainTypeValue = document.querySelector('input[name="mainType"]:checked').value;
             const catValue = document.getElementById('categoryFilter').value;
-            const authorValue = document.getElementById('authorFilter').value;
-            const countryValue = document.getElementById('countryFilter').value;
+            
+            // Lấy giá trị trực tiếp từ ô Input Tác giả và Quốc gia
+            const authorValue = document.getElementById('authorSearchInput').value.toLowerCase().trim();
+            const countryValue = document.getElementById('countrySearchInput').value.toLowerCase().trim();
             const fileValue = document.getElementById('fileFilter').value;
 
             const filteredBooks = myBooks.filter(book => {
@@ -403,36 +365,41 @@
                 const catStr = book.category ? book.category.toLowerCase() : '';
                 const countryStr = book.country ? book.country.toLowerCase() : '';
                 const yearStr = book.publishYear ? book.publishYear.toString() : '';
+                const fileStr = book.fileType ? book.fileType.toLowerCase() : '';
                 
-                const matchSearch = titleStr.includes(searchTerm) || 
-                                    authorStr.includes(searchTerm) || 
-                                    catStr.includes(searchTerm) || 
-                                    countryStr.includes(searchTerm) || 
-                                    yearStr.includes(searchTerm);
+                const matchSearch = titleStr.includes(searchTerm) || authorStr.includes(searchTerm) || 
+                                    catStr.includes(searchTerm) || countryStr.includes(searchTerm) || 
+                                    yearStr.includes(searchTerm) || fileStr.includes(searchTerm);
                 
                 const matchType = (searchTerm !== '') ? true : (book.mainType === mainTypeValue);
                 
                 let matchCat = true;
                 if (searchTerm === '' && catValue !== 'all') {
                     if (book.category) {
-                        // Tách mảng thể loại bằng dấu phẩy và xóa khoảng trắng 2 bên
                         let catArray = book.category.split(',').map(c => c.trim());
-                        // So sánh chính xác thể loại chọn với mảng thể loại của sách
                         matchCat = catArray.includes(catValue);
-                    } else {
-                        matchCat = false;
-                    }
+                    } else { matchCat = false; }
                 }
                 
-                const matchAuthor = (searchTerm !== '') ? true : (authorValue === 'all' || book.author === authorValue);
-                const matchCountry = (searchTerm !== '') ? true : (countryValue === 'all' || book.country === countryValue);
-                const matchFile = (searchTerm !== '') ? true : (fileValue === 'all' || book.fileType === fileValue);
+                let matchFile = true;
+                if (searchTerm === '' && fileValue !== 'all') {
+                    if (book.fileType) {
+                        let fileArray = book.fileType.split(',').map(f => f.trim());
+                        matchFile = fileArray.includes(fileValue);
+                    } else { matchFile = false; }
+                }
+                
+                // Thuật toán kiểm tra Tác giả & Quốc gia kiểu gõ chữ (Substring matching)
+                const matchAuthor = (searchTerm !== '') ? true : 
+                    (authorValue === '' || (book.author && book.author.toLowerCase().includes(authorValue)));
+                    
+                const matchCountry = (searchTerm !== '') ? true : 
+                    (countryValue === '' || (book.country && book.country.toLowerCase().includes(countryValue)));
                 
                 return matchSearch && matchType && matchCat && matchAuthor && matchCountry && matchFile;
             });
 
             filteredBooks.sort((a, b) => b.publishYear - a.publishYear);
-
             displayBooks(filteredBooks);
         }
 
@@ -446,6 +413,7 @@
             }
 
             const currentCatFilter = document.getElementById('categoryFilter').value;
+            const currentFileFilter = document.getElementById('fileFilter').value;
             const currentSearchTerm = document.getElementById('searchBox').value.toLowerCase().trim();
 
             books.forEach(book => {
@@ -453,31 +421,32 @@
                 if (book.category) {
                     let catArray = book.category.split(',').map(c => c.trim());
                     let firstCat = catArray[0];
-
-                    if (currentCatFilter !== 'all' && catArray.includes(currentCatFilter)) {
-                        firstCat = currentCatFilter;
-                    } 
+                    if (currentCatFilter !== 'all' && catArray.includes(currentCatFilter)) { firstCat = currentCatFilter; } 
                     else if (currentSearchTerm !== '') {
                         let matchedCat = catArray.find(c => c.toLowerCase().includes(currentSearchTerm));
-                        if (matchedCat) {
-                            firstCat = matchedCat;
-                        }
+                        if (matchedCat) firstCat = matchedCat;
                     }
-
                     let moreCount = catArray.length - 1;
-                    
-                    categoryTagsHTML = `<span class="book-tag tag-category" title="Tất cả thể loại: ${book.category}">${firstCat}</span>`;
-                    
-                    if (moreCount > 0) {
-                        categoryTagsHTML += `<span class="book-tag tag-more" title="Tất cả thể loại: ${book.category}">+${moreCount}</span>`;
-                    }
+                    categoryTagsHTML = `<span class="book-tag tag-category" title="${book.category}">${firstCat}</span>`;
+                    if (moreCount > 0) categoryTagsHTML += `<span class="book-tag tag-more" title="${book.category}">+${moreCount}</span>`;
                 }
 
-                const fileTag = book.fileType ? `<span class="book-tag tag-file">${book.fileType}</span>` : '';
+                let fileTagsHTML = '';
+                if (book.fileType) {
+                    let fileArray = book.fileType.split(',').map(f => f.trim());
+                    let firstFile = fileArray[0];
+                    if (currentFileFilter !== 'all' && fileArray.includes(currentFileFilter)) { firstFile = currentFileFilter; } 
+                    else if (currentSearchTerm !== '') {
+                        let matchedFile = fileArray.find(f => f.toLowerCase().includes(currentSearchTerm));
+                        if (matchedFile) firstFile = matchedFile;
+                    }
+                    let moreFileCount = fileArray.length - 1;
+                    fileTagsHTML = `<span class="book-tag tag-file" title="${book.fileType}">${firstFile}</span>`;
+                    if (moreFileCount > 0) fileTagsHTML += `<span class="book-tag tag-file-more" title="${book.fileType}">+${moreFileCount}</span>`;
+                }
                 
                 const affiliateBtn = book.affiliateLink 
-                    ? `<a href="${book.affiliateLink}" target="_blank" class="btn-info">Thông tin</a>` 
-                    : '';
+                    ? `<a href="${book.affiliateLink}" target="_blank" class="btn-info">Thông tin</a>` : '';
                 
                 const card = document.createElement('div');
                 card.className = 'book-card';
@@ -486,14 +455,13 @@
                         <img src="${book.imgUrl}" alt="${book.title}" onerror="this.src='https://via.placeholder.com/180x260?text=No+Cover'">
                     </div>
                     <div class="book-info">
-                        <div>
+                        <div style="width: 100%;">
                             <p class="book-title">${book.title}</p>
                             <p class="book-author">${book.author || 'Đang cập nhật'}</p>
-                            
                             <div class="book-meta">
                                 <span class="book-tag tag-main">${book.mainType}</span>
                                 ${categoryTagsHTML}
-                                ${fileTag}
+                                ${fileTagsHTML}
                             </div>
                         </div>
                         ${affiliateBtn}
